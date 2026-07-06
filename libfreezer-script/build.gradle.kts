@@ -6,7 +6,7 @@ plugins {
 }
 
 configure<LibraryExtension> {
-    namespace = "io.github.libxposed.api"
+    namespace = "nep.timeline.freezer.core.script.api"
 
     defaultConfig {
         minSdk = 29
@@ -17,6 +17,16 @@ configure<LibraryExtension> {
         targetSdk = 37
     }
 
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
@@ -24,6 +34,5 @@ configure<LibraryExtension> {
 }
 
 dependencies {
-    compileOnly("androidx.annotation:annotation:1.10.0")
-    compileOnly("io.github.libxposed:annotation:1.0.0")
+    compileOnly(project(":app"))
 }
