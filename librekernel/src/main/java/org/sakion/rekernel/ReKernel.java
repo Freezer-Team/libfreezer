@@ -8,12 +8,10 @@ import static org.sakion.rekernel.GenericUtils.NETLINK_GENERIC;
 import static org.sakion.rekernel.GenericUtils.NLA_HDRLEN;
 import static org.sakion.rekernel.GenericUtils.NLMSG_HDRLEN;
 import static org.sakion.rekernel.GenericUtils.NLM_F_REQUEST;
-import static org.sakion.rekernel.GenericUtils.REKERNEL_A_PID;
 import static org.sakion.rekernel.GenericUtils.REKERNEL_A_UID;
 import static org.sakion.rekernel.GenericUtils.REKERNEL_C_ADD_MONITOR_NET;
 import static org.sakion.rekernel.GenericUtils.REKERNEL_C_DEL_MONITOR_NET;
 import static org.sakion.rekernel.GenericUtils.REKERNEL_C_GET_VERSION;
-import static org.sakion.rekernel.GenericUtils.REKERNEL_C_KILL_NET;
 import static org.sakion.rekernel.GenericUtils.SOCKET_RECV_BUFSIZE;
 import static org.sakion.rekernel.GenericUtils.SOL_NETLINK;
 import static org.sakion.rekernel.GenericUtils.StringToInteger;
@@ -318,7 +316,7 @@ public class ReKernel {
                         break;
                     try {
                         versionLock.wait(wait);
-                    } catch (InterruptedException _) {
+                    } catch (InterruptedException ignored) {
                         Thread.currentThread().interrupt();
                         break;
                     }
@@ -338,7 +336,7 @@ public class ReKernel {
                     out.flush();
                 }
                 return true;
-            } catch (Throwable _) {
+            } catch (Throwable ignored) {
                 return false;
             }
         }
@@ -397,11 +395,11 @@ public class ReKernel {
             version = null;
             try {
                 s.shutdownInput();
-            } catch (Throwable _) {
+            } catch (Throwable ignored) {
             }
             try {
                 s.close();
-            } catch (Throwable _) {
+            } catch (Throwable ignored) {
             }
             if (cb != null) {
                 if (readError != null)
@@ -432,11 +430,11 @@ public class ReKernel {
                 reader.setDaemon(true);
                 reader.start();
                 return true;
-            } catch (Throwable _) {
+            } catch (Throwable throwable) {
                 try {
                     if (s != null)
                         s.close();
-                } catch (Throwable _) {
+                } catch (Throwable ignored) {
                 }
                 socketRef.set(null);
                 out = null;
@@ -496,9 +494,9 @@ public class ReKernel {
                 try {
                     Os.write(fileDescriptor, byteBuffer.array(), 0, total);
                     return true;
-                } catch (ErrnoException _) {
+                } catch (ErrnoException ignored) {
                 }
-            } catch (Throwable _) {
+            } catch (Throwable ignored) {
             }
 
             return false;
@@ -518,9 +516,9 @@ public class ReKernel {
                 try {
                     Os.write(fileDescriptor, byteBuffer.array(), 0, total);
                     return true;
-                } catch (ErrnoException _) {
+                } catch (ErrnoException ignored) {
                 }
-            } catch (Throwable _) {
+            } catch (Throwable ignored) {
             }
 
             return false;
@@ -571,16 +569,6 @@ public class ReKernel {
             return versionMinor;
         }
 
-        public static boolean destroySocket(int pid) {
-            if (!isRunning() || getMajorVersion() < 10)
-                return false;
-
-            if (legacy)
-                return sendLegacyCommand(4, pid); // REKERNEL_CMD_KILL_NET
-
-            return sendCommand(REKERNEL_C_KILL_NET, true, REKERNEL_A_PID, pid);
-        }
-
         /**
          * Query the loaded Re:Kernel module version. Sends REKERNEL_C_GET_VERSION and
          * waits for the kernel's unicast reply on a private short-lived socket (so it
@@ -607,12 +595,12 @@ public class ReKernel {
                 int length = Os.read(descriptor, reply);
                 reply.order(ByteOrder.nativeOrder());
                 return extractVersion(reply, length);
-            } catch (Throwable _) {
+            } catch (Throwable ignored) {
                 return null;
             } finally {
                 try {
                     GenericUtils.closeAndSignalBlockedThreads(descriptor);
-                } catch (Throwable _) {
+                } catch (Throwable ignored) {
                 }
             }
         }
@@ -677,7 +665,7 @@ public class ReKernel {
 
                             try {
                                 Os.write(descriptor, byteBuffer.array(), 0, total);
-                            } catch (ErrnoException _) {
+                            } catch (ErrnoException ignored) {
                             }
                         } catch (Throwable throwable) {
                             callback.exception(new IllegalStateException("FAILED_TO_SEND_MESSAGE_TO_RE_KERNEL_SERVER"));
@@ -691,7 +679,7 @@ public class ReKernel {
 
                             try {
                                 Os.write(descriptor, byteBuffer.array(), 0, total);
-                            } catch (ErrnoException _) {
+                            } catch (ErrnoException ignored) {
                             }
                         } catch (Throwable throwable) {
                             callback.exception(new IllegalStateException("FAILED_TO_SEND_MESSAGE_TO_RE_KERNEL_SERVER"));
@@ -710,7 +698,7 @@ public class ReKernel {
                             if (!descriptor.valid() || e.errno == OsConstants.EBADF)
                                 break;
                         } catch (StringIndexOutOfBoundsException | InterruptedIOException |
-                                 NumberFormatException _) {
+                                 NumberFormatException ignored) {
                         } catch (Exception e) {
                             callback.exception(e);
                         }
@@ -720,7 +708,7 @@ public class ReKernel {
                 reader.start();
 
                 return defaultUnit ? -1 : netlinkUnit;
-            } catch (Throwable _) {
+            } catch (Throwable ignored) {
 
             }
 
@@ -773,7 +761,7 @@ public class ReKernel {
                             if (!descriptor.valid() || e.errno == OsConstants.EBADF)
                                 break;
                         } catch (StringIndexOutOfBoundsException | InterruptedIOException |
-                                 NumberFormatException _) {
+                                 NumberFormatException ignored) {
                         } catch (Exception e) {
                             callback.exception(e);
                         }
@@ -783,11 +771,11 @@ public class ReKernel {
                 reader.start();
 
                 return 0;
-            } catch (Throwable _) {
+            } catch (Throwable throwable) {
                 if (fileDescriptor != null) {
                     try {
                         GenericUtils.closeAndSignalBlockedThreads(fileDescriptor);
-                    } catch (IOException _) {
+                    } catch (IOException ignored) {
                     }
                 }
             }
@@ -803,7 +791,7 @@ public class ReKernel {
                     HANDLER.post(() -> cb.disconnected(legacy ? Callback.Category.Legacy : Callback.Category.Generic));
                 setVersion(null);
                 GenericUtils.closeAndSignalBlockedThreads(fileDescriptor);
-            } catch (Throwable _) {
+            } catch (Throwable ignored) {
             }
         }
     }
