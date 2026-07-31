@@ -98,7 +98,6 @@ public interface XposedModuleInterface {
         @XposedApiExact(100)
         @NonNull
         ClassLoader getClassLoader();
-
     }
 
     /**

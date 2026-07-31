@@ -577,6 +577,9 @@ public class ReKernel {
          * module, an unsupported module, or any error.
          */
         private static String readVersion() {
+            if (isLegacy())
+                return null;
+
             FileDescriptor descriptor = null;
             try {
                 descriptor = Os.socket(OsConstants.AF_NETLINK, OsConstants.SOCK_DGRAM, NETLINK_GENERIC);
@@ -624,7 +627,7 @@ public class ReKernel {
                         if (files.length == 1)
                             netlinkUnit = StringToInteger(file.getName());
                         else if (file.getName().equals("version")) {
-                            setVersion(Files.readAllLines(file.toPath()).get(0));;
+                            setVersion(Files.readAllLines(file.toPath()).get(0));
                             netlinkUnit = StringToInteger(files[1].getName());
                         } else {
                             setVersion(Files.readAllLines(files[1].toPath()).get(0));
