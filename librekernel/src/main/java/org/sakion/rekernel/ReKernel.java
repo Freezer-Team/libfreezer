@@ -46,13 +46,24 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ReKernel {
     private ReKernel() {}
 
-    private static final HandlerThread THREAD = create();
+    public static final HandlerThread THREAD = create();
     private static HandlerThread create() {
         HandlerThread t = new HandlerThread("Re-Kernel");
         t.start();
         return t;
     }
-    private static final Handler HANDLER = new Handler(THREAD.getLooper());
+    public static final Handler HANDLER = new Handler(THREAD.getLooper());
+
+    public static boolean destroyHandler() {
+        try {
+            HANDLER.removeCallbacksAndMessages(null);
+            HANDLER.getLooper().quit();
+            THREAD.quit();
+            return true;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
 
     private static void resolver(Callback.Category category, AsciiView data, Callback callback) {
         int indexOf = data.indexOf("type");
