@@ -1,11 +1,8 @@
-import com.android.build.api.dsl.LibraryExtension
-
 plugins {
-    id("com.android.base")
     id("com.android.library")
 }
 
-configure<LibraryExtension> {
+android {
     namespace = "org.sakion.rekernel"
 
     defaultConfig {
